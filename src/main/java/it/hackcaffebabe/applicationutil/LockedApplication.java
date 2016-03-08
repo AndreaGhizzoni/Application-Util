@@ -5,5 +5,24 @@ package it.hackcaffebabe.applicationutil;
  */
 public class LockedApplication
 {
+    private static LockedApplication instance;
+
+    /**
+     * TODO add doc
+     * @return
+     */
+    public static LockedApplication getInstance(){
+        if( instance == null )
+            instance = new LockedApplication();
+        return instance;
+    }
+
+    /*
+     *
+     */
+    private LockedApplication(){
+
+    }
+
 
 }
