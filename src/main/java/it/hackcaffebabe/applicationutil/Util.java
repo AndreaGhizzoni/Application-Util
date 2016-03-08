@@ -7,18 +7,12 @@ import java.lang.management.ManagementFactory;
  */
 public class Util
 {
-    // this attribute is set once getProcessID() is called
-    private static Long pid = null;
-
     /**
      * TODO add doc
      * @return
      */
     public static Long getProcessID(){
-        if( pid == null ) {
-            String pName = ManagementFactory.getRuntimeMXBean().getName();
-            pid = Long.parseLong(pName.split("@")[0]);
-        }
-        return pid;
+        String pName = ManagementFactory.getRuntimeMXBean().getName();
+        return Long.parseLong(pName.split("@")[0]);
     }
 }
