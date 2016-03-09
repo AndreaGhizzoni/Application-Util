@@ -11,7 +11,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * TODO add doc and examples
+ * Locker class provide a simple method to prevent multiple instances of a
+ * single program.
+ * <pre>{@code
+ * String appId = "myApp";
+ * Locker l = new Locker(appId);
+ * if( l.isAlreadyRunning() ){
+ *     // do something
+ * }else{
+ *     // do something else
+ * }
+ * }</pre>
  */
 public class Locker
 {
@@ -25,8 +35,13 @@ public class Locker
     private String lockID;
 
     /**
-     * TODO add doc
-     * @param lockID
+     * Create a new Locker with a specific lockID. Creating multiple Locker with
+     * the same lockID is equivalent to run the same application multiple times;
+     * this behavior is caused because Locker use a temporary file locked by
+     * your application. When the application shuts down, the file will be
+     * deleted.
+     * @param lockID {@link java.lang.String} the application lock id.
+     * @throws IllegalArgumentException if argument given is null or empty string.
      */
     public Locker(String lockID) throws IllegalArgumentException {
         this.setLockID(lockID);
@@ -55,8 +70,8 @@ public class Locker
 //  METHODS
 //==============================================================================
     /**
-     * TODO add doc
-     * @return
+     * Check if current application is already running or not.
+     * @return true if application is already running, false otherwise.
      */
     public boolean isAlreadyRunning(){
         //try to lock
@@ -72,7 +87,7 @@ public class Locker
         return false;
     }
 
-    /* TODO add comment */
+    /* close the current lock and channel */
     private void closeLock() throws IOException {
         if( this.applicationFileLock != null )
             this.applicationFileLock.release();
@@ -80,14 +95,14 @@ public class Locker
             this.applicationFileChannel.close();
     }
 
-    /* TODO add comment */
+    /* delete the current file */
     private void deleteFile() throws IOException{
         //this.applicationFile.delete();
         if(this.applicationFile != null )
             Files.delete(Paths.get(this.applicationFile.getAbsolutePath()));
     }
 
-    /* TODO add comment */
+    /* build the path of lock file */
     private String makeFileName(){
         return TMP_DIR + SEP + this.getLockID() + ".lock";
     }
@@ -96,13 +111,16 @@ public class Locker
 //  SETTER
 //==============================================================================
     /**
-     * TODO add doc
-     * @param LockID
-     * @throws IllegalArgumentException
+     * Set the lock identifier for current application.
+     * @param LockID {@link java.lang.String} the application ID
+     * @throws IllegalArgumentException if argument given is null or empty
+     *                                  string.
      */
     public void setLockID(String LockID) throws IllegalArgumentException {
         if( LockID == null || LockID.isEmpty() )
-            throw new IllegalArgumentException("FileID given can not be null or empty string");
+            throw new IllegalArgumentException(
+                    "LockID given can not be null or empty string"
+            );
         this.lockID = LockID;
     }
 
@@ -110,8 +128,8 @@ public class Locker
 //  GETTER
 //==============================================================================
     /**
-     * TODO add doc
-     * @return
+     * Return the current application lock ID.
+     * @return {@link java.lang.String} the current application lock ID.
      */
     public String getLockID(){ return this.lockID; }
 }
