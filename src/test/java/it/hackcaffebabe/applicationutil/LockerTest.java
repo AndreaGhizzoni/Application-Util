@@ -13,7 +13,6 @@ public class LockerTest
         String lockID = "testingID";
 
         Locker l1 = createNewLocker(lockID);
-
         String appIDFromLocker = l1.getLockID();
         Assert.assertTrue("Expected that application id remain the same",
                 lockID.equals(appIDFromLocker));
