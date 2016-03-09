@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 /**
  * TODO add doc and examples
  */
-public class LockedApplication
+public class Locker
 {
     // static constant that returns the platform dependent temporary directory.
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
@@ -28,7 +28,7 @@ public class LockedApplication
      * TODO add doc
      * @param fileID
      */
-    public LockedApplication(String fileID) throws IllegalArgumentException {
+    public Locker(String fileID) throws IllegalArgumentException {
         this.setFileID(fileID);
         // create a file in <TEMP_DIR>/fileID.lock
         this.applicationFile = new File( this.makeFileName() );
