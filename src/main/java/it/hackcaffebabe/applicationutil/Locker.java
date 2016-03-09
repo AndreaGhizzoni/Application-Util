@@ -110,13 +110,8 @@ public class Locker
 //==============================================================================
 //  SETTER
 //==============================================================================
-    /**
-     * Set the lock identifier for current application.
-     * @param LockID {@link java.lang.String} the application ID
-     * @throws IllegalArgumentException if argument given is null or empty
-     *                                  string.
-     */
-    public void setLockID(String LockID) throws IllegalArgumentException {
+    /* Set the lock identifier for current application. */
+    private void setLockID(String LockID) throws IllegalArgumentException {
         if( LockID == null || LockID.isEmpty() )
             throw new IllegalArgumentException(
                     "LockID given can not be null or empty string"
