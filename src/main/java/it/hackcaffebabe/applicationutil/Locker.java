@@ -22,15 +22,15 @@ public class Locker
     private File applicationFile;
     private FileChannel applicationFileChannel;
     private FileLock applicationFileLock;
-    private String fileID;
+    private String lockID;
 
     /**
      * TODO add doc
-     * @param fileID
+     * @param lockID
      */
-    public Locker(String fileID) throws IllegalArgumentException {
-        this.setFileID(fileID);
-        // create a file in <TEMP_DIR>/fileID.lock
+    public Locker(String lockID) throws IllegalArgumentException {
+        this.setLockID(lockID);
+        // create a file in <TEMP_DIR>/lockID.lock
         this.applicationFile = new File( this.makeFileName() );
         // create channel to file
         try {
@@ -89,7 +89,7 @@ public class Locker
 
     /* TODO add comment */
     private String makeFileName(){
-        return TMP_DIR + SEP + this.getFileID() + ".lock";
+        return TMP_DIR + SEP + this.getLockID() + ".lock";
     }
 
 //==============================================================================
@@ -97,13 +97,13 @@ public class Locker
 //==============================================================================
     /**
      * TODO add doc
-     * @param fileID
+     * @param LockID
      * @throws IllegalArgumentException
      */
-    public void setFileID(String fileID) throws IllegalArgumentException {
-        if( fileID == null || fileID.isEmpty() )
+    public void setLockID(String LockID) throws IllegalArgumentException {
+        if( LockID == null || LockID.isEmpty() )
             throw new IllegalArgumentException("FileID given can not be null or empty string");
-        this.fileID = fileID;
+        this.lockID = LockID;
     }
 
 //==============================================================================
@@ -113,5 +113,5 @@ public class Locker
      * TODO add doc
      * @return
      */
-    public String getFileID(){ return this.fileID; }
+    public String getLockID(){ return this.lockID; }
 }
