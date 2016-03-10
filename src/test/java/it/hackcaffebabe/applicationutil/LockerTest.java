@@ -3,6 +3,9 @@ package it.hackcaffebabe.applicationutil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * Test class for {@link Locker}
  */
@@ -11,8 +14,18 @@ public class LockerTest
     @Test
     public void testLocker(){
         String lockID = "testingID";
-
         Locker l1 = createNewLocker(lockID);
+
+        String TMP_DIR = System.getProperty("java.io.tmpdir");
+        String SEP = System.getProperty("file.separator");
+        boolean fileMustExists = Files.exists(
+                Paths.get(TMP_DIR+SEP+l1.getLockID()+".lock")
+        );
+        Assert.assertTrue(
+                "Expected that locker creates a lock file in <TMP>/getLockID()+\".lock\"",
+                fileMustExists
+        );
+
         String appIDFromLocker = l1.getLockID();
         Assert.assertTrue("Expected that application id remain the same",
                 lockID.equals(appIDFromLocker));
