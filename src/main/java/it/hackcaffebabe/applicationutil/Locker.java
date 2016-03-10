@@ -55,15 +55,7 @@ public class Locker
             // ignored because is sure that file exists
         } catch (FileNotFoundException ignored) {}
 
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    closeLock();
-                    deleteFile();
-                } catch (IOException ignored) {}
-            }
-        }));
+
     }
 
 //==============================================================================
@@ -76,7 +68,22 @@ public class Locker
     public boolean isAlreadyRunning(){
         //try to lock
         try {
-            this.applicationFileLock = this.applicationFileChannel.lock();
+            this.applicationFileLock = this.applicationFileChannel.tryLock();
+            // if tryLock() returns null then another application has already
+            // locked the file. It is the same case if it throws exceptions.
+            if( this.applicationFileLock == null ){
+                return false;
+            }
+
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    closeLock();
+                    deleteFile();
+                } catch (IOException ignored) {}
+            }
+        }));
         } catch (OverlappingFileLockException ignored) {
             // if lock fail, other application is running
             return true;
