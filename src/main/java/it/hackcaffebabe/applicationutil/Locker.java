@@ -48,9 +48,8 @@ public class Locker
     /**
      * Create a new Locker with a specific lockID. Creating multiple Locker with
      * the same lockID is equivalent to run the same application multiple times;
-     * this behavior is caused because Locker use a temporary file locked by
-     * your application. When the application shuts down, the file will be
-     * deleted.
+     * this behavior is caused because Locker use a temporary file to lock your
+     * application. When the application shuts down, the file will be deleted.
      * @param lockID {@link java.lang.String} the application lock id.
      * @throws IllegalArgumentException if argument given is null or empty string.
      */
@@ -65,7 +64,7 @@ public class Locker
             ).getChannel();
             // ignored because is sure that file exists
         } catch (FileNotFoundException ignored) {
-            ignored.printStackTrace();
+            //ignored.printStackTrace();
         }
     }
 
@@ -86,8 +85,8 @@ public class Locker
                 return true;
             }
 
-            // add hook only if it can get lock on file
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            // add shutdown hook only if it can get lock on file
+            Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -102,7 +101,9 @@ public class Locker
         } catch (IOException e) {
             return true; // not sure
         }
-        // if reached, application is not already running
+
+        // if reached, no other application is already running with the same
+        // lockID given to Locker
         return false;
     }
 
@@ -116,7 +117,6 @@ public class Locker
 
     /* delete the current file */
     private void deleteFile() throws IOException{
-        //this.applicationFile.delete();
         if(this.applicationFile != null )
             Files.delete(Paths.get(this.applicationFile.getAbsolutePath()));
     }
