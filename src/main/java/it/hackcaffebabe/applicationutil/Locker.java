@@ -25,6 +25,17 @@ import java.nio.file.Paths;
  */
 public class Locker
 {
+    /*
+        TODO:
+        using lockID.pid as file locked, so a second run application can
+        detect what process (pid) is already running.
+
+        TODO: keep in mind ( from this article http://goo.gl/8OlXBD )
+        Shutdown Hook: is NOT guarantee that is execute always; it is executed
+        only when JVM is closed normally, not via SIGKILL.
+        If multiple Shutdown Hook has been added, their execution order is not
+        guarantee
+    */
     // static constant that returns the platform dependent temporary directory.
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final String SEP = System.getProperty("file.separator");
