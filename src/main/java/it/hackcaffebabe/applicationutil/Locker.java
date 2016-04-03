@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Locker class provide a simple method to prevent multiple instances of a
- * single program.
+ * java program.
  * <pre>{@code
  * String appId = "myApp";
  * Locker l = new Locker(appId);
