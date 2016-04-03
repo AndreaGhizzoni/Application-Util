@@ -131,14 +131,14 @@ public class Locker
 //  SETTER
 //==============================================================================
     /* Set the lock identifier for current application. */
-    private void setLockID(String LockID) throws IllegalArgumentException {
-        if( LockID == null || LockID.isEmpty() )
+    private void setLockID(String lid) throws IllegalArgumentException {
+        if( lid == null || lid.isEmpty() )
             throw new IllegalArgumentException(
-                    "LockID given can not be null or empty string");
-        if(Pattern.compile("[\\/]*").matcher(lockID).matches())
+                    "Argument lid given can not be null or empty string");
+        if(Pattern.matches(".*[/\\x5c].*", lid))
             throw new IllegalArgumentException(
-                    "LockID given is not a regular file name.");
-        this.lockID = LockID;
+                    "Argument lid given is not a regular file name.");
+        this.lockID = lid;
     }
 
 //==============================================================================

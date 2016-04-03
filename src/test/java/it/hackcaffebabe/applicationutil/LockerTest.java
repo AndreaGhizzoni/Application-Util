@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.locks.Lock;
 
 /**
  * Test class for {@link Locker}
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 public class LockerTest
 {
     @Test
-    public void testLocker(){
+    public void testCorrectBehavior(){
         String lockID = "testingID";
         Locker l1 = createNewLocker(lockID);
 
@@ -38,6 +39,20 @@ public class LockerTest
         boolean mustBeTrue = l2.isAlreadyRunning();
         Assert.assertTrue("Expected true for the second check of isAlreadyRunning",
                 mustBeTrue);
+    }
+
+    @Test
+    public void testNotAllowedTestId(){
+        // testing multiple lockID not allowed
+        String[] idForFail = { "/this/is/a/path", "/this/is/.also/a/path",
+            "thisisnota/file", "/this\\ is\\ not\\ a file", null, ""
+        };
+        for( String s: idForFail ){
+            try{
+                new Locker(s);
+                Assert.fail("Expect to fail for id = "+s);
+            }catch (IllegalArgumentException ignored){}
+        }
     }
 
 //==============================================================================
