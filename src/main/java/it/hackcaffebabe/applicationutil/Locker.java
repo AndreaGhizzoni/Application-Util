@@ -9,6 +9,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 
 /**
  * Locker class provide a simple method to prevent multiple instances of a
@@ -133,8 +134,10 @@ public class Locker
     private void setLockID(String LockID) throws IllegalArgumentException {
         if( LockID == null || LockID.isEmpty() )
             throw new IllegalArgumentException(
-                    "LockID given can not be null or empty string"
-            );
+                    "LockID given can not be null or empty string");
+        if(Pattern.compile("[\\/]*").matcher(lockID).matches())
+            throw new IllegalArgumentException(
+                    "LockID given is not a regular file name.");
         this.lockID = LockID;
     }
 
