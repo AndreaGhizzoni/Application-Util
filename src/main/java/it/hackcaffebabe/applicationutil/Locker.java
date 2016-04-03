@@ -37,10 +37,6 @@ public class Locker
         If multiple Shutdown Hook has been added, their execution order is not
         guarantee
     */
-    // static constant that returns the platform dependent temporary directory.
-    private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-    private static final String SEP = System.getProperty("file.separator");
-
     private File applicationFile;
     private FileChannel applicationFileChannel;
     private FileLock applicationFileLock;
@@ -124,6 +120,8 @@ public class Locker
 
     /* build the path of lock file */
     private String makeFileName(){
+        String TMP_DIR = System.getProperty("java.io.tmpdir");
+        String SEP = System.getProperty("file.separator");
         return TMP_DIR + SEP + this.getLockID() + ".lock";
     }
 
