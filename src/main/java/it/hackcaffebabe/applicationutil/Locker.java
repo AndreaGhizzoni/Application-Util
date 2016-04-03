@@ -52,8 +52,9 @@ public class Locker
      * application. When the application shuts down, the file will be deleted.
      * @param lockID {@link java.lang.String} the application lock id.
      * @throws IllegalArgumentException if argument given is null or empty string.
+     * @throws SecurityException if Security Manager block creation of files.
      */
-    public Locker(String lockID) throws IllegalArgumentException {
+    public Locker(String lockID) throws IllegalArgumentException, SecurityException {
         this.setLockID(lockID);
         // create a file in <TEMP_DIR>/lockID.lock
         this.applicationFile = new File( this.makeFileName() );
@@ -62,9 +63,8 @@ public class Locker
             this.applicationFileChannel = new RandomAccessFile(
                     this.applicationFile, "rw"
             ).getChannel();
-            // ignored because is sure that file exists
         } catch (FileNotFoundException ignored) {
-            //ignored.printStackTrace();
+            // ignored because applicationFile is set to a fixed path.
         }
     }
 
