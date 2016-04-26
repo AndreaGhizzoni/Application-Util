@@ -68,6 +68,40 @@ public class Locker
 //==============================================================================
 //  METHODS
 //==============================================================================
+    public int checkLock(){
+        try{
+            this.applicationFileLock = this.applicationFileChannel.tryLock();
+            // if tryLock() returns null then another application has already
+            // locked the file. It is the same case if it throws exceptions.
+            if( this.applicationFileLock == null ){
+                // read pid from this.applicationFile.getAbsolutePath()
+                // and return it
+            }else{
+                // add shutdown hook only if it can get lock on file
+                Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            closeLock();
+                            deleteFile();
+                        } catch (IOException ignored) {} // TODO maybe log this
+                    }
+                }));
+
+                // write my pid into this.applicationFile.getAbsolutePath()
+                // and return it
+            }
+        }catch (OverlappingFileLockException | IOException ignored){
+            // read pid from this.applicationFile.getAbsolutePath()
+            // and return it
+        }
+
+        // if reached, no other application is already running with the same
+        // lockID given to Locker
+        return 0;
+    }
+
+
     /**
      * Check if current application is already running or not.
      * @return true if application is already running, false otherwise.
