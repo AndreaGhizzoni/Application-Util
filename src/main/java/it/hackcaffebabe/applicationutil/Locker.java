@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
@@ -27,11 +29,7 @@ import java.util.regex.Pattern;
 public class Locker
 {
     /*
-        TODO:
-        using lockID.pid as file locked, so a second run application can
-        detect what process (pid) is already running.
-
-        TODO: keep in mind ( from this article http://goo.gl/8OlXBD )
+        TO keep in mind ( from this article http://goo.gl/8OlXBD )
         Shutdown Hook: is NOT guarantee that is execute always; it is executed
         only when JVM is closed normally, not via SIGKILL.
         If multiple Shutdown Hook has been added, their execution order is not
@@ -68,7 +66,20 @@ public class Locker
 //==============================================================================
 //  METHODS
 //==============================================================================
-    public int checkLock(){
+    /**
+     * This method checks if another application is already running with the
+     * same lockID (specified in constructor method), in this case return the
+     * process id of the application that is already running. No matter how many
+     * instance of the single application you can launch, it will be return the
+     * process id of the first application that has been launched.
+     * In the other case, where there is no other application with the same
+     * lockID running, this method returns the process id of the current
+     * application.
+     * @return {@link java.lang.Long} the long representing the PID described
+     *         previous.
+     * @throws IOException if something went terribly wrong.
+     */
+    public long checkLock() throws IOException{
         try{
             this.applicationFileLock = this.applicationFileChannel.tryLock();
             // if tryLock() returns null then another application has already
@@ -76,6 +87,7 @@ public class Locker
             if( this.applicationFileLock == null ){
                 // read pid from this.applicationFile.getAbsolutePath()
                 // and return it
+                return readPid();
             }else{
                 // add shutdown hook only if it can get lock on file
                 Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
@@ -84,58 +96,50 @@ public class Locker
                         try {
                             closeLock();
                             deleteFile();
-                        } catch (IOException ignored) {} // TODO maybe log this
+                        } catch (IOException ignored) {}
                     }
                 }));
 
                 // write my pid into this.applicationFile.getAbsolutePath()
                 // and return it
+                int nOfBytesWritten = writePid();
+                if( nOfBytesWritten <= 0 ){
+                    throw new IOException("Writing pid returned zero bytes " +
+                            "written.");
+                }else{
+                    return Util.getProcessID();
+                }
             }
-        }catch (OverlappingFileLockException | IOException ignored){
+        }catch (OverlappingFileLockException ignored) {
             // read pid from this.applicationFile.getAbsolutePath()
             // and return it
+            return readPid();
         }
-
-        // if reached, no other application is already running with the same
-        // lockID given to Locker
-        return 0;
     }
 
+    /* write pid into file lock */
+    private int writePid() throws IOException {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        byteBuffer.putLong( Util.getProcessID() );
+        byteBuffer.flip(); // necessary: https://goo.gl/vGQX5O
+        int nOfBytesWritten = this.applicationFileChannel.write(byteBuffer);
+        byteBuffer.clear();
+        return nOfBytesWritten;
+    }
 
-    /**
-     * Check if current application is already running or not.
-     * @return true if application is already running, false otherwise.
-     */
-    public boolean isAlreadyRunning(){
-        //try to lock
-        try {
-            this.applicationFileLock = this.applicationFileChannel.tryLock();
-            // if tryLock() returns null then another application has already
-            // locked the file. It is the same case if it throws exceptions.
-            if( this.applicationFileLock == null ){
-                return true;
-            }
-
-            // add shutdown hook only if it can get lock on file
-            Runtime.getRuntime().addShutdownHook(new Thread( new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        closeLock();
-                        deleteFile();
-                    } catch (IOException ignored) {}
-                }
-            }));
-        } catch (OverlappingFileLockException ignored) {
-            // if lock fail, other application is running
-            return true;
-        } catch (IOException e) {
-            return true; // not sure
+    /* read pid from file lock */
+    private long readPid() throws IOException {
+        MappedByteBuffer mappedByteBuffer = this.applicationFileChannel.map(
+                FileChannel.MapMode.READ_ONLY, 0,
+                this.applicationFileChannel.size()
+        );
+        mappedByteBuffer.load();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        while( mappedByteBuffer.hasRemaining() ){
+            byteBuffer.put(mappedByteBuffer.get());
         }
-
-        // if reached, no other application is already running with the same
-        // lockID given to Locker
-        return false;
+        byteBuffer.flip(); // necessary: https://goo.gl/vGQX5O
+        return byteBuffer.getLong();
     }
 
     /* close the current lock and channel */

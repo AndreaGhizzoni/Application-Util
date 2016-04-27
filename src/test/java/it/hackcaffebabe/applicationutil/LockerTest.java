@@ -3,6 +3,7 @@ package it.hackcaffebabe.applicationutil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -16,28 +17,44 @@ public class LockerTest
         String lockID = "testingID";
         Locker l1 = createNewLocker(lockID);
 
+        Assert.assertTrue(
+            "Expected that application id remain the same",
+            lockID.equals(l1.getLockID())
+        );
+
         String TMP_DIR = System.getProperty("java.io.tmpdir");
         String SEP = System.getProperty("file.separator");
         boolean fileMustExists = Files.exists(
                 Paths.get(TMP_DIR+SEP+l1.getLockID()+".lock")
         );
         Assert.assertTrue(
-                "Expected that locker creates a lock file in <TMP>/getLockID()+\".lock\"",
-                fileMustExists
+            "Expected that locker creates a lock file in <TMP>/getLockID()+\".lock\"",
+            fileMustExists
         );
 
-        String appIDFromLocker = l1.getLockID();
-        Assert.assertTrue("Expected that application id remain the same",
-                lockID.equals(appIDFromLocker));
-
-        boolean mustBeFalse = l1.isAlreadyRunning();
-        Assert.assertFalse("Expected false for the first check of isAlreadyRunning",
-                mustBeFalse);
+        long myPid = Util.getProcessID();
+        try{
+            long fromLocker = l1.checkLock();
+            Assert.assertEquals(
+                    "Expected the same pid from Util.getProcessID() and l1.checkLock()",
+                    myPid,
+                    fromLocker
+            );
+        }catch (IOException ioe){
+            Assert.fail(ioe.getMessage());
+        }
 
         Locker l2 = createNewLocker(lockID);
-        boolean mustBeTrue = l2.isAlreadyRunning();
-        Assert.assertTrue("Expected true for the second check of isAlreadyRunning",
-                mustBeTrue);
+        try{
+            long fromLocker = l2.checkLock();
+            Assert.assertEquals(
+                    "Expected the same pid from Util.getProcessID() and l2.checkLock()",
+                    myPid,
+                    fromLocker
+            );
+        }catch (IOException ioe){
+            Assert.fail(ioe.getMessage());
+        }
     }
 
     @Test
